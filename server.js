@@ -243,6 +243,6 @@ function findUserByUsername(username) {
 
 // Start the server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen({host: '0.0.0.0', port:PORT}, () => {
   console.log(`Server is running on port ${PORT}`);
 });
