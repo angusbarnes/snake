@@ -1,0 +1,24 @@
+h2 {
+    text-align: center;
+    width: 100%;
+}
+
+#game-element {
+    width: fit-content;
+    margin: auto;
+    outline: black;
+    outline-style: ridge;
+    outline-width: 10px;
+}
+
+main {
+    width: auto;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.subtitle {
+    text-align: center;
+    width: 100%;
+}

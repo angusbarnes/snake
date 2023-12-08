@@ -1,0 +1,139 @@
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser-arcade-physics.min.js"></script>
+    <link href="style.css" rel="stylesheet" />
+    <title>Play with my snake</title>
+  </head>
+  <body>
+    <h2>🐍 Snooc Game</h2>
+    <script src="main.js"></script>
+    <div id="game-element"></div>
+    <main>
+      <p>Will you play the snooc game?</p>
+      <p>Are you brave enough?</p>
+      <hr />
+      <p>Use the arrow keys to find out. You know what to do.</p>
+      <hr />
+      <h2>Snooc Scores</h2>
+      <p class="subtitle">These are the scores other brave souls achieved:</p>
+      <ol id="highScores">
+      </ol>
+
+      <section id="login-section">
+        <h2>User Registration</h2>
+        <form id="registerForm">
+          <input type="text" id="username" placeholder="Username" required />
+          <input type="password" id="password" placeholder="Password" required />
+          <button type="submit">Register</button>
+        </form>
+  
+        <!-- Form for user login -->
+        <h2>User Login</h2>
+        <form id="loginForm">
+          <input type="text" id="loginUsername" placeholder="Username" required />
+          <input type="password" id="loginPassword" placeholder="Password" required />
+          <button type="submit">Login</button>
+        </form>
+      </section>
+      <p id="logged-in" style="display: none;">You are logged in as <span id="user"></span>  <button style="padding-left: 5px;" onclick="logout()">Logout</button></p>
+      <script>
+        // Check if the user is logged in
+        const isLoggedIn = localStorage.getItem("loggedIn") === "true";
+        if (isLoggedIn) {
+          const username = localStorage.getItem("username");
+          document.getElementById('login-section').setAttribute('style', 'display: none;')
+          document.getElementById('logged-in').setAttribute('style', 'display: block;')
+          document.getElementById('user').textContent = username
+          console.log(`Welcome back, ${username}!`);
+        } else {
+          console.log("User is not logged in.");
+        }
+
+        function logout() {
+          const isLoggedIn = localStorage.setItem("loggedIn","false")
+          location.reload();
+        }
+        // Function to fetch high scores and display them
+        async function fetchHighScores() {
+          const response = await fetch("/highscores");
+          const highScores = await response.json();
+
+          const highScoresList = document.getElementById("highScores");
+          highScoresList.innerHTML = "";
+
+          highScores.forEach((score, index) => {
+            const li = document.createElement("li");
+
+            if (index === 0) {
+              li.textContent = `${score.username}: ${score.score} 🥇`;
+            } else if (index === 1) {
+              li.textContent = `${score.username}: ${score.score} 🥈`;
+            } else if (index === 2) {
+              li.textContent = `${score.username}: ${score.score} 🥉`;
+            } else {
+              li.textContent = `${score.username}: ${score.score}`;
+            }
+
+            highScoresList.appendChild(li);
+          });
+        }
+
+        // Function to handle user registration
+        document.getElementById("registerForm").addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          const response = await fetch("/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const data = await response.json();
+          console.log(data);
+        });
+
+        // Function to handle user login
+        document.getElementById("loginForm").addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const username = document.getElementById("loginUsername").value;
+          const password = document.getElementById("loginPassword").value;
+
+          try {
+            const response = await fetch("/login", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ username, password }),
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              // Handle successful login, e.g., redirect to another page
+              localStorage.setItem("loggedIn", "true");
+              localStorage.setItem("username", username);
+              localStorage.setItem("token", data.token);
+              console.log("Login successful");
+            } else {
+              // Handle failed login
+              const errorData = await response.json();
+              const errorMessage = errorData.message || "Login failed";
+            }
+          } catch (error) {
+            console.error("Error occurred:", error);
+          }
+        });
+        // Fetch high scores on page load
+        fetchHighScores();
+
+        setInterval(fetchHighScores, 3000);
+      </script>
+    </main>
+  </body>
+</html>
