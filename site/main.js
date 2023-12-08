@@ -210,6 +210,9 @@ class Example extends Phaser.Scene
           cursors = this.input.keyboard.createCursorKeys();
           score_text = this.add.text(5, 5, "", { fontFamily: "Silkscreen, monospace", fontSize: 28 });
           dead_text = this.add.text(40, 20, "", { color: "red", fontFamily: "Silkscreen, monospace", fontSize: 40 })
+          
+          score_text.setDepth(10);
+          dead_text.setDepth(10);
           score_count = 0;
         
           repositionFood(food);
