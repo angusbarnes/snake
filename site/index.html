@@ -2,18 +2,20 @@
   <head>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser-arcade-physics.min.js"></script>
     <link href="style.css" rel="stylesheet" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pangolin&family=Silkscreen&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pangolin&family=Silkscreen&display=swap"
+      rel="stylesheet"
+    />
     <title>Play with my snake</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
     <h2>🐍 Snooc Game</h2>
 
     <div id="game-element"></div>
 
-    
     <main>
       <!-- <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
         <div class="dpad">
@@ -33,17 +35,17 @@
       <hr />
       <h2>Snooc Scores</h2>
       <p class="subtitle">These are the scores other brave souls achieved:</p>
-      <ol id="highScores">
-      </ol>
+      <ol id="highScores"></ol>
 
-      <section id="login-section">
+      <section id="register-section">
         <h2>User Registration</h2>
         <form id="registerForm">
           <input type="text" id="username" placeholder="Username" required />
           <input type="password" id="password" placeholder="Password" required />
           <button type="submit">Register</button>
         </form>
-  
+      </section>
+      <section id="login-section">
         <!-- Form for user login -->
         <h2>User Login</h2>
         <form id="loginForm">
@@ -52,39 +54,48 @@
           <button type="submit">Login</button>
         </form>
       </section>
-      <p id="logged-in" style="display: none;">You are logged in as <span id="user"></span>  <button style="padding-left: 5px;" onclick="logout()">Logout</button></p>
+      <p id="logged-in" style="display: none">
+        You are logged in as <span id="user"></span>
+        <button style="padding-left: 5px" onclick="logout()">Logout</button>
+      </p>
+      <p>Play Count: <span id="plays"></span></p>
+      <p>Total Score: <span id="total"></span></p>
+      <p>Avg. Score: <span id="avg"></span></p>
       <script>
         // Check if the user is logged in
         const isLoggedIn = localStorage.getItem("loggedIn") === "true";
         if (isLoggedIn) {
           const username = localStorage.getItem("username");
-          document.getElementById('login-section').setAttribute('style', 'display: none;')
-          document.getElementById('logged-in').setAttribute('style', 'display: block;')
-          document.getElementById('user').textContent = username
+          document.getElementById("login-section").setAttribute("style", "display: none;");
+          document.getElementById("register-section").setAttribute("style", "display: none;");
+          document.getElementById("logged-in").setAttribute("style", "display: block;");
+          document.getElementById("user").textContent = username;
+
+          fetchPlayerStats(username);
           console.log(`Welcome back, ${username}!`);
         } else {
           console.log("User is not logged in.");
         }
 
         function logout() {
-          const isLoggedIn = localStorage.setItem("loggedIn","false")
+          localStorage.setItem("loggedIn", "false");
           location.reload();
         }
 
-
         function isMobileDevice() {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
+          return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+          );
+        }
 
-// Example usage:
-if (isMobileDevice()) {
-  // Code to execute if the client is on a mobile device
-  console.log('Client is using a mobile device');
-} else {
-  // Code for non-mobile devices
-  console.log('Client is not using a mobile device');
-}
-
+        // Example usage:
+        if (isMobileDevice()) {
+          // Code to execute if the client is on a mobile device
+          console.log("Client is using a mobile device");
+        } else {
+          // Code for non-mobile devices
+          console.log("Client is not using a mobile device");
+        }
 
         // Function to fetch high scores and display them
         async function fetchHighScores() {
@@ -109,6 +120,24 @@ if (isMobileDevice()) {
 
             highScoresList.appendChild(li);
           });
+        }
+
+        async function fetchPlayerStats(username) {
+          const response = await fetch("/player_stats", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json", // Set the content type to JSON
+            },
+            body: JSON.stringify({ username: username }),
+          });
+          const stats = await response.json();
+          console.log(stats);
+          const play_count = document.getElementById("plays");
+          const total_count = document.getElementById("total");
+          const avg_score = document.getElementById("avg");
+          play_count.innerHTML = stats.stat.play_count;
+          total_count.innerHTML = stats.stat.total_score;
+          avg_score.innerHTML = (stats.stat.total_score / stats.stat.play_count).toFixed(2);
         }
 
         // Function to handle user registration

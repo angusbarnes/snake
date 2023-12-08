@@ -229,6 +229,42 @@ app.get("/highscores", async (req, res) => {
   }
 });
 
+// Get high scores endpoint
+app.post("/player_stats", async (req, res) => {
+  const { username } = req.body;
+  console.log(username)
+  try {
+    // Get top 10 high scores
+    db.all("SELECT * FROM player_stats WHERE username = ?", [username], (err, rows) => {
+      if (err) {
+        return res.status(500).json({ message: "Failed to get high scores" });
+      }
+      console.log(rows)
+      res.json({stat:rows.slice(-1)[0]});
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
+
+// Route to serve the file for download
+app.get('/download', (req, res) => {
+  const filePath = './data.db'; // Replace this with the actual path to your file
+
+  // Set the appropriate headers for the file download
+  res.setHeader('Content-Disposition', 'attachment; filename="data.db"'); // Set the filename as desired
+  res.setHeader('Content-Type', 'application/octet-stream'); // Set the file's MIME type
+
+  // Send the file for download
+  res.download(filePath, (err) => {
+    if (err) {
+      // Handle error if the file couldn't be sent
+      console.log(err)
+      res.status(500).send('Error downloading the file');
+    }
+  });
+});
+
 // Function to find user by username
 function findUserByUsername(username) {
   return new Promise((resolve, reject) => {
@@ -242,7 +278,7 @@ function findUserByUsername(username) {
 }
 
 // Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 app.listen({host: '0.0.0.0', port:PORT}, () => {
   console.log(`Server is running on port ${PORT}`);
 });
